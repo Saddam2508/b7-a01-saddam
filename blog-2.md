@@ -1,51 +1,69 @@
-# Why any Is a Type Safety Hole and Why unknown Is Safer
+# Using Pick and Omit to keep typeScript Code Dry
 
-## introduction:
+## Introduction
 
-TypeScript helps catch mistakes before code runs. But not all types give the same level of safety. Two commonly discussed types are any and unknown.
+In large projects, repeating similar type definitions creates maintenance problems. TypeScript provides utility types such as Pick and Omit to create smaller slices of a master interface.
 
-The any type disables TypeScript's checking, while unknown keeps type safety and forces validation before use.
-
-## Why any is Called a Type Safety Hole
-
-When a value is typed as any, TypeScript allows almost anything .
+Master Interface
 
 ```
-let value: any = "hello";
-value.toUpperCase();
-value.notExistingMethod()
-
-```
-
-TypeScript will not report an error, even if the method does not exist. This creates a "type safety hole" because invalid code can pass compilation.
-
-## Why unknown Is Safer
-
-unknown is useful when data comes from an unpredictable source like APIs, user input, or external files.
-
-```
-let value: unknown = "hello" ;
-
-value.toUpperCase();
-
-```
-
-This produces an error because TypeScript does no know the actual type yet.
-
-## Type Narrowing
-
-Type narrowing means checking a value before using it so TypeScript can understand its real type.
-
-```
-let value: unknown = "hello";
-if (typeof value === "string){
-console.log(value.toUpperCase());
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  password: string;
+  role: string
 }
 
 ```
 
-Inside the if block, TypeScript knows value is a string
+## Using Pick
 
-## Conclusion:
+Pick creates a new type by selecting only specific properties.
 
-any removes TypeScript's protection and can hide bugs. unknown is safer because it requires validation before usage. In real projects, unknown is the better choice when data is uncertain.
+```
+type UserPreview =Pick <User, "id" | "name" | "email">
+
+```
+
+Useful when showing profile information without exposing everything.
+
+## Using Omit
+
+Omit creates a new type by removing properties.
+
+```
+type publicUser = Omit <User, "password">
+
+```
+
+This is useful for API responses where sensitive data should not be returned.
+
+## Why This Prevents Duplication
+
+Without utility types, you may rewrite similar interfaces many times.
+
+```
+interface UserPreview {
+  id: number;
+  name: string;
+  email: string;
+}
+
+```
+
+if the original User changes, every copied version must be updated manually.
+
+## DRY Principle
+
+DRY means don't repeat yourself. Pick and Omit reuse one master interface and generate specialized version from it.
+
+This keeps code:
+
+1. easier to maintain
+2. more consistent
+3. less error-prone
+
+## Conclusion
+
+Pick and Omit help build clean, reusable type definitions. Instead of duplicating interface, create small focused slices from one source of truth.
